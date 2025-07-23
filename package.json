@@ -1,0 +1,23 @@
+{
+  "name": "devopspractice",
+  "version": "1.0.0",
+  "description": "aprendiendo devops",
+  "homepage": "https://github.com/yeyu2083/DevopsPractice#readme",
+  "bugs": {
+    "url": "https://github.com/yeyu2083/DevopsPractice/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yeyu2083/DevopsPractice.git"
+  },
+  "license": "ISC",
+  "author": "YesI Windecker",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
