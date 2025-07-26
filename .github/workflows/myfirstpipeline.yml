@@ -12,14 +12,57 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        continue-on-error: true
         
-      - name: Check runner environment
+      - name: Create logs directory
         run: |
-          Write-Host "Hello from self-hosted runner!"
-          Write-Host "Current directory:"
-          Get-Location
-          Write-Host "Directory contents:"
-          Get-ChildItem
-          Write-Host "Runner user:"
-          whoami
+          New-Item -ItemType Directory -Force -Path ".\logs"
         shell: powershell
+        
+      - name: Check runner environment with detailed logs
+        run: |
+          $ErrorActionPreference = 'Continue'
+          Start-Transcript -Path ".\logs\environment.log"
+          
+          Write-Host "=== Environment Information ===" | Tee-Object -FilePath ".\logs\summary.log"
+          Write-Host "PowerShell Version:" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          $PSVersionTable | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Write-Host "`n=== Current Directory ===" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Write-Host "Current Path:" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Get-Location | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Write-Host "`n=== Directory Contents ===" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Get-ChildItem -Recurse | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Write-Host "`n=== System Information ===" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Write-Host "Runner User:" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          whoami | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Write-Host "`n=== Environment Variables ===" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Get-ChildItem env: | Format-Table -AutoSize | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Write-Host "`n=== Error Logs ===" | Tee-Object -Append -FilePath ".\logs\summary.log"
+          Get-Error | Tee-Object -Append -FilePath ".\logs\summary.log"
+          
+          Stop-Transcript
+        shell: powershell
+        continue-on-error: true
+        
+      - name: Verify Git with logs
+        run: |
+          Write-Host "=== Git Information ===" | Tee-Object -FilePath ".\logs\git.log"
+          git --version | Tee-Object -Append -FilePath ".\logs\git.log"
+          git status | Tee-Object -Append -FilePath ".\logs\git.log"
+          
+          Write-Host "`n=== Git Config ===" | Tee-Object -Append -FilePath ".\logs\git.log"
+          git config --list | Tee-Object -Append -FilePath ".\logs\git.log"
+        shell: powershell
+        continue-on-error: true
+        
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: runner-logs
+          path: logs/
