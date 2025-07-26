@@ -1,4 +1,4 @@
-name: Simple Workflow Test
+name: Pipeline Workflow
 
 on:
   push:
@@ -7,9 +7,70 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test-job:
+  init:
     runs-on: self-hosted
     steps:
+      - name: Check Environment
+        shell: powershell
+        run: |
+          Write-Host "=== Initialization Phase ==="
+          Write-Host "Current Directory:"
+          Get-Location
+          Write-Host "System Info:"
+          systeminfo | Select-String "OS"
+
+  test:
+    runs-on: self-hosted
+    needs: init
+    steps:
+      - name: Run Tests
+        shell: powershell
+        run: |
+          Write-Host "=== Testing Phase ==="
+          Write-Host "Checking Node.js version:"
+          node --version
+          npm --version
+          Write-Host "Listing project files:"
+          Get-ChildItem -Recurse
+
+  build:
+    runs-on: self-hosted
+    needs: [init, test]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker Image
+        shell: powershell
+        run: |
+          Write-Host "=== Build Phase ==="
+          $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+          docker build . --file Dockerfile --tag my-image-name:$timestamp
+        
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Deploy Application
+        shell: powershell
+        run: |
+          Write-Host "=== Deploy Phase ==="
+          $timestamp = Get-Date -Format "yyyyMMddHHmmss"
+          Write-Host "Simulating deployment of my-image-name:$timestamp"
+          # Aquí irían los comandos reales de deployment
+
+  notify:
+    runs-on: self-hosted
+    needs: deploy
+    if: always()
+    steps:
+      - name: Notification Status
+        shell: powershell
+        run: |
+          Write-Host "=== Notification Phase ==="
+          if ($env:GITHUB_JOB_STATUS -eq 'success') {
+            Write-Host "✅ Pipeline completed successfully!"
+          } else {
+            Write-Host "❌ Pipeline encountered issues."
+          }
       - name: Show initial directory
         run: |
           Write-Host "=== TEST EXECUTION STARTED ==="
