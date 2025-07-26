@@ -10,13 +10,25 @@ jobs:
   test-job:
     runs-on: self-hosted
     steps:
+      - name: Show initial directory
+        run: |
+          Write-Host "=== TEST EXECUTION STARTED ==="
+          Write-Host "Current directory before checkout:"
+          Get-Location
+          Write-Host "Directory contents before checkout:"
+          Get-ChildItem
+          Write-Host "=== INITIAL CHECK COMPLETE ==="
+        shell: powershell
+        
       - name: Checkout repository
         uses: actions/checkout@v3
-        continue-on-error: true
         
-      - name: Create logs directory
+      - name: Show directory after checkout
         run: |
-          New-Item -ItemType Directory -Force -Path ".\logs"
+          Write-Host "Current directory after checkout:"
+          Get-Location
+          Write-Host "Directory contents after checkout:"
+          Get-ChildItem
         shell: powershell
         
       - name: Check runner environment with detailed logs
