@@ -9,13 +9,13 @@ on:
 jobs:
 
   init:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Lista directorio
         run: ls -la
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Lista de directorio
         run: | 
@@ -24,7 +24,7 @@ jobs:
 
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [init, test]
 
     steps:
@@ -34,7 +34,7 @@ jobs:
 
   deploy:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: build
 
     steps:
@@ -44,7 +44,7 @@ jobs:
   
   notify:
 
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: deploy
 
     steps:
