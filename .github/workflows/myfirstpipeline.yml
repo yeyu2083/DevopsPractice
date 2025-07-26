@@ -12,17 +12,17 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Lista directorio
-        run: dir
-        shell: cmd
+        run: Get-ChildItem
+        shell: powershell
 
   test:
     runs-on: self-hosted
     steps:
       - name: Lista de directorio
-        run: | 
-          echo "Ejecutando test:"
-          dir
-        shell: cmd
+        run: |
+          Write-Host "Ejecutando test:"
+          Get-ChildItem
+        shell: powershell
 
   build:
 
@@ -32,8 +32,10 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:%date:~-4,4%%date:~-10,2%%date:~-7,2%-%time:~0,2%%time:~3,2%%time:~6,2%
-      shell: cmd
+      run: |
+        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        docker build . --file Dockerfile --tag "my-image-name:$timestamp"
+      shell: powershell
 
   deploy:
 
@@ -42,8 +44,10 @@ jobs:
 
     steps:
     - name: Deploy the Docker image
-      run: echo "Deploying my-image-name:%date:~-4,4%%date:~-10,2%%date:~-7,2%-%time:~0,2%%time:~3,2%%time:~6,2% to production"
-      shell: cmd
+      run: |
+        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        Write-Host "Deploying my-image-name:$timestamp to production"
+      shell: powershell
       # Here you would typically add commands to deploy your Docker image, e.g., pushing to a registry or deploying to a server.
   
   notify:
@@ -53,6 +57,8 @@ jobs:
 
     steps:
     - name: Notify deployment success
-      run: echo "Deployment successful! Image my-image-name:%date:~-4,4%%date:~-10,2%%date:~-7,2%-%time:~0,2%%time:~3,2%%time:~6,2% is now live."
-      shell: cmd
+      run: |
+        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
+        Write-Host "Deployment successful! Image my-image-name:$timestamp is now live."
+      shell: powershell
       # You can add additional notification steps here, such as sending a message to Slack or email.
