@@ -10,9 +10,16 @@ jobs:
   test-job:
     runs-on: self-hosted
     steps:
-      - name: Run simple command
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Check runner environment
         run: |
           Write-Host "Hello from self-hosted runner!"
           Write-Host "Current directory:"
           Get-Location
+          Write-Host "Directory contents:"
+          Get-ChildItem
+          Write-Host "Runner user:"
+          whoami
         shell: powershell
