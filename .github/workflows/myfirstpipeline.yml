@@ -1,4 +1,4 @@
-name: pipeline CI
+name: Simple Workflow Test
 
 on:
   push:
@@ -7,58 +7,12 @@ on:
     branches: [ "main" ]
 
 jobs:
-
-  init:
+  test-job:
     runs-on: self-hosted
     steps:
-      - name: Lista directorio
-        run: Get-ChildItem
-        shell: powershell
-
-  test:
-    runs-on: self-hosted
-    steps:
-      - name: Lista de directorio
+      - name: Run simple command
         run: |
-          Write-Host "Ejecutando test:"
-          Get-ChildItem
+          Write-Host "Hello from self-hosted runner!"
+          Write-Host "Current directory:"
+          Get-Location
         shell: powershell
-
-  build:
-
-    runs-on: self-hosted
-    needs: [init, test]
-
-    steps:
-    - uses: actions/checkout@v4
-    - name: Build the Docker image
-      run: |
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-        docker build . --file Dockerfile --tag "my-image-name:$timestamp"
-      shell: powershell
-
-  deploy:
-
-    runs-on: self-hosted
-    needs: build
-
-    steps:
-    - name: Deploy the Docker image
-      run: |
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-        Write-Host "Deploying my-image-name:$timestamp to production"
-      shell: powershell
-      # Here you would typically add commands to deploy your Docker image, e.g., pushing to a registry or deploying to a server.
-  
-  notify:
-
-    runs-on: self-hosted
-    needs: deploy
-
-    steps:
-    - name: Notify deployment success
-      run: |
-        $timestamp = Get-Date -Format "yyyyMMdd-HHmmss"
-        Write-Host "Deployment successful! Image my-image-name:$timestamp is now live."
-      shell: powershell
-      # You can add additional notification steps here, such as sending a message to Slack or email.
