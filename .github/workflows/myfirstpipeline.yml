@@ -10,6 +10,11 @@ jobs:
   init:
     runs-on: self-hosted
     steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
       - name: Check Environment
         shell: pwsh -ExecutionPolicy Bypass -Command "{0}"
         run: |
@@ -18,11 +23,20 @@ jobs:
           Get-Location
           Write-Host "System Info:"
           systeminfo | Select-String "OS"
+          Write-Host "Node.js Version:"
+          node --version
+          Write-Host "NPM Version:"
+          npm --version
 
   test:
     runs-on: self-hosted
     needs: init
     steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies Setup
+        uses: actions/setup-node@v4
+        with:
+          node-version: '21'
       - name: Run Tests
         shell: pwsh -ExecutionPolicy Bypass -Command "{0}"
         run: |
