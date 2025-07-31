@@ -92,24 +92,33 @@ jobs:
     needs: deploy
     if: always()
     steps:
-      - name: send telegram message on push
-        uses: appleboy/telegram-action@master
-        with:
-          to: ${{ secrets.TELEGRAM_TO }}
-          token: ${{ secrets.TELEGRAM_TOKEN }}
-          message: |
-            🚀 **Pipeline Completed Successfully!**
-            
-            👤 **Actor:** ${{ github.actor }}
-            📝 **Commit:** ${{ github.event.commits[0].message }}
-            🏷️ **Branch:** ${{ github.ref_name }}
-            📦 **Repository:** ${{ github.repository }}
-            🐳 **Docker Image:** yesicawind/devopspractice:latest
-            
-            ✅ **Phases completed:**
-            • Init & Test (parallel)
-            • Build & Docker Push
-            • Deploy
-            • Notification
-            
-            🔗 **See changes:** https://github.com/${{ github.repository }}/commit/${{github.sha}}
+      - name: Send Telegram notification
+        shell: pwsh -ExecutionPolicy Bypass -Command "{0}"
+        run: |
+          Write-Host "=== Sending Telegram Notification ==="
+          
+          $token = "${{ secrets.TELEGRAM_TOKEN }}"
+          $chatId = "${{ secrets.TELEGRAM_TO }}"
+          $actor = "${{ github.actor }}"
+          $commit = "${{ github.event.head_commit.message }}"
+          $branch = "${{ github.ref_name }}"
+          $repo = "${{ github.repository }}"
+          $sha = "${{ github.sha }}"
+          
+          $message = "🚀 **Pipeline Completed Successfully!**`n`n👤 **Actor:** $actor`n📝 **Commit:** $commit`n🏷️ **Branch:** $branch`n📦 **Repository:** $repo`n🐳 **Docker Image:** yesicawind/devopspractice:latest`n`n✅ **Phases completed:**`n• Init & Test (parallel)`n• Build & Docker Push`n• Deploy`n• Notification`n`n🔗 **See changes:** https://github.com/$repo/commit/$sha"
+          
+          $uri = "https://api.telegram.org/bot$token/sendMessage"
+          $body = @{
+              chat_id = $chatId
+              text = $message
+              parse_mode = "Markdown"
+          }
+          
+          try {
+              $response = Invoke-RestMethod -Uri $uri -Method Post -Body $body
+              Write-Host "✅ Telegram message sent successfully!"
+              Write-Host "Message ID: $($response.result.message_id)"
+          }
+          catch {
+              Write-Host "❌ Failed to send Telegram message: $($_.Exception.Message)"
+          }
