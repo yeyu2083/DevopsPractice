@@ -52,6 +52,15 @@ jobs:
     needs: [init, test]
     steps:
       - uses: actions/checkout@v4
+      - name: Debug credentials
+        shell: pwsh -ExecutionPolicy Bypass -Command "{0}"
+        run: |
+          Write-Host "=== Debug Docker Credentials ==="
+          Write-Host "Username: ${{ vars.DOCKERHUB_USERNAME }}"
+          Write-Host "Token exists: ${{ secrets.DOCKERHUB_TOKEN != '' }}"
+          Write-Host "Token length: $($env:DOCKERHUB_TOKEN.Length)"
+        env:
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
@@ -65,7 +74,7 @@ jobs:
           push: true
           context: .
           file: Dockerfile
-          tags: yeyu2083/github-actions-devopspractice:latest
+          tags: yesicawind/devopspractice:latest
         
   deploy:
     runs-on: self-hosted
