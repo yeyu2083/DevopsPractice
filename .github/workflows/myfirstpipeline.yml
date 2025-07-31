@@ -30,7 +30,6 @@ jobs:
 
   test:
     runs-on: self-hosted
-    needs: init
     steps:
       - uses: actions/checkout@v4
       - name: Dependencies Setup
@@ -93,10 +92,24 @@ jobs:
     needs: deploy
     if: always()
     steps:
-      - name: Notification Status
-        shell: pwsh -ExecutionPolicy Bypass -Command "{0}"
-        run: |
-          Write-Host "=== Notification Phase ==="
-          Write-Host "✅ Pipeline workflow completed!"
-          Write-Host "All phases executed successfully"
-          Write-Host "Final timestamp: $(Get-Date)"
+      - name: send telegram message on push
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          message: |
+            🚀 **Pipeline Completed Successfully!**
+            
+            👤 **Actor:** ${{ github.actor }}
+            📝 **Commit:** ${{ github.event.commits[0].message }}
+            🏷️ **Branch:** ${{ github.ref_name }}
+            📦 **Repository:** ${{ github.repository }}
+            🐳 **Docker Image:** yesicawind/devopspractice:latest
+            
+            ✅ **Phases completed:**
+            • Init & Test (parallel)
+            • Build & Docker Push
+            • Deploy
+            • Notification
+            
+            🔗 **See changes:** https://github.com/${{ github.repository }}/commit/${{github.sha}}
